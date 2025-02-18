@@ -1,54 +1,49 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Prochains passages du Tram Divia à Godrans</title>
+  <!-- Refreshes the entire page every 45 seconds -->
+  <meta http-equiv="refresh" content="45" />
+  <title>Tram Times at Godrans</title>
 </head>
 <body>
-  <h1>Horaires du Tram T1 et T2 à l'arrêt Godrans</h1>
+  <h1>Tram Times at Godrans (T1 & T2)</h1>
 
-  <h2>Ligne T1</h2>
-  <ul id="passagesT1"></ul>
+  <h2>T1</h2>
+  <ul id="t1-schedules"></ul>
 
-  <h2>Ligne T2</h2>
-  <ul id="passagesT2"></ul>
+  <h2>T2</h2>
+  <ul id="t2-schedules"></ul>
 
   <script>
-    /**
-     * Fonction générique pour aller chercher les horaires d'une ligne de tram à un arrêt précis
-     * puis les afficher dans un élément <ul> (identifié par elementId).
-     */
-    function fetchTramSchedule(line, stop, elementId) {
+    function fetchTramData(line, stop, elementId) {
       const apiUrl = `https://divia.jbdemonte.fr/tram/${line}/stop/${encodeURIComponent(stop)}`;
 
       fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
           const listElement = document.getElementById(elementId);
-          listElement.innerHTML = ''; // On vide la liste avant de la remplir
+          listElement.innerHTML = ''; // Clear old items
 
-          // Selon la doc, la réponse contient un objet avec une clé "schedules" (tableau)
           if (data && data.schedules && data.schedules.length > 0) {
             data.schedules.forEach(schedule => {
               const li = document.createElement('li');
-              // On suppose que schedule.destination et schedule.time existent
-              li.textContent = `Destination: ${schedule.destination} - Passage: ${schedule.time}`;
+              li.textContent = `Destination: ${schedule.destination} - Time: ${schedule.time}`;
               listElement.appendChild(li);
             });
           } else {
-            // Si l'API ne renvoie pas de résultats ou s'il n'y a pas d'horaires
-            listElement.innerHTML = '<li>Aucun horaire trouvé pour cette ligne/arrêt.</li>';
+            listElement.innerHTML = '<li>No data found.</li>';
           }
         })
-        .catch(error => {
-          console.error('Erreur lors de la requête :', error);
-          document.getElementById(elementId).innerHTML = '<li>Impossible de récupérer les données (voir console).</li>';
+        .catch(err => {
+          console.error(err);
+          document.getElementById(elementId).innerHTML = '<li>Error fetching data.</li>';
         });
     }
 
-    // On appelle la fonction pour T1 et T2 à Godrans
-    fetchTramSchedule('T1', 'Godrans', 'passagesT1');
-    fetchTramSchedule('T2', 'Godrans', 'passagesT2');
+    // Fetch T1 and T2 data for "Godrans"
+    fetchTramData('T1', 'Godrans', 't1-schedules');
+    fetchTramData('T2', 'Godrans', 't2-schedules');
   </script>
 </body>
 </html>
