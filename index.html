@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prochains passages du Tram Divia à Godrans</title>
+</head>
+<body>
+  <h1>Horaires du Tram T1 et T2 à l'arrêt Godrans</h1>
+
+  <h2>Ligne T1</h2>
+  <ul id="passagesT1"></ul>
+
+  <h2>Ligne T2</h2>
+  <ul id="passagesT2"></ul>
+
+  <script>
+    /**
+     * Fonction générique pour aller chercher les horaires d'une ligne de tram à un arrêt précis
+     * puis les afficher dans un élément <ul> (identifié par elementId).
+     */
+    function fetchTramSchedule(line, stop, elementId) {
+      const apiUrl = `https://divia.jbdemonte.fr/tram/${line}/stop/${encodeURIComponent(stop)}`;
+
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          const listElement = document.getElementById(elementId);
+          listElement.innerHTML = ''; // On vide la liste avant de la remplir
+
+          // Selon la doc, la réponse contient un objet avec une clé "schedules" (tableau)
+          if (data && data.schedules && data.schedules.length > 0) {
+            data.schedules.forEach(schedule => {
+              const li = document.createElement('li');
+              // On suppose que schedule.destination et schedule.time existent
+              li.textContent = `Destination: ${schedule.destination} - Passage: ${schedule.time}`;
+              listElement.appendChild(li);
+            });
+          } else {
+            // Si l'API ne renvoie pas de résultats ou s'il n'y a pas d'horaires
+            listElement.innerHTML = '<li>Aucun horaire trouvé pour cette ligne/arrêt.</li>';
+          }
+        })
+        .catch(error => {
+          console.error('Erreur lors de la requête :', error);
+          document.getElementById(elementId).innerHTML = '<li>Impossible de récupérer les données (voir console).</li>';
+        });
+    }
+
+    // On appelle la fonction pour T1 et T2 à Godrans
+    fetchTramSchedule('T1', 'Godrans', 'passagesT1');
+    fetchTramSchedule('T2', 'Godrans', 'passagesT2');
+  </script>
+</body>
+</html>
