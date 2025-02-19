@@ -4,16 +4,24 @@
   <meta charset="UTF-8" />
   <title>Tram Times at Darcy</title>
   <script>
+    /**
+     * Fetches tram data from the Divia API for a specific line and stop.
+     * @param {string} line - The tram line (e.g., 'T1', 'T2').
+     * @param {string} stop - The tram stop (e.g., 'Darcy').
+     * @param {string} elementId - The ID of the HTML element to populate with results.
+     */
     async function fetchTramData(line, stop, elementId) {
+      // Adjust this URL if you run a local proxy or alternative endpoint:
       const apiUrl = `https://api.divia.filau.fr/totem/${line}/${encodeURIComponent(stop)}`;
 
       try {
+        // IMPORTANT: Some environments block cross-site requests or require special CORS headers.
         const response = await fetch(apiUrl, { mode: 'cors' });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
 
+        const data = await response.json();
         const listElement = document.getElementById(elementId);
         listElement.innerHTML = '';
 
@@ -32,6 +40,10 @@
       }
     }
 
+    /**
+     * Starts periodic refreshing of the tram data without reloading the page.
+     * @param {number} interval - The interval in milliseconds for refreshing (e.g., 5000 for 5 seconds).
+     */
     function startAutoRefresh(interval) {
       fetchTramData('T1', 'Darcy', 't1-schedules');
       fetchTramData('T2', 'Darcy', 't2-schedules');
@@ -41,13 +53,43 @@
       }, interval);
     }
 
-    window.addEventListener('load', () => startAutoRefresh(5000)); // Refresh API every 5 seconds without page reload
+    /**
+     * TEST FUNCTION: Basic check to confirm T1 data fetching at Darcy.
+     * Logs success/failure messages to the console for debugging.
+     */
+    async function testFetchTramData() {
+      const testLine = 'T1';
+      const testStop = 'Darcy';
+      console.log(`Running test for ${testLine} at ${testStop}`);
+
+      try {
+        const apiUrl = `https://api.divia.filau.fr/totem/${testLine}/${encodeURIComponent(testStop)}`;
+        const response = await fetch(apiUrl, { mode: 'cors' });
+        if (!response.ok) {
+          throw new Error(`HTTP error during test! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('Test fetch data:', data);
+      } catch (error) {
+        console.error('Test fetch failed:', error.message);
+      }
+    }
+
+    window.addEventListener('load', () => {
+      // Start refreshing every 5 seconds
+      startAutoRefresh(5000);
+
+      // Optionally call the test function to verify connectivity
+      testFetchTramData();
+    });
   </script>
 </head>
 <body>
   <h1>Tram Times at Darcy (T1 & T2)</h1>
+
   <h2>T1</h2>
   <ul id="t1-schedules"></ul>
+
   <h2>T2</h2>
   <ul id="t2-schedules"></ul>
 </body>
