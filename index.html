@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="2" /> <!-- Refresh every 2 seconds -->
   <title>Tram Times at Darcy</title>
   <script>
     async function fetchTramData(line, stop, elementId) {
@@ -33,14 +32,16 @@
       }
     }
 
-    window.addEventListener('load', () => {
+    function startAutoRefresh(interval) {
       fetchTramData('T1', 'Darcy', 't1-schedules');
       fetchTramData('T2', 'Darcy', 't2-schedules');
       setInterval(() => {
         fetchTramData('T1', 'Darcy', 't1-schedules');
         fetchTramData('T2', 'Darcy', 't2-schedules');
-      }, 2000); // Refresh every 2 seconds
-    });
+      }, interval);
+    }
+
+    window.addEventListener('load', () => startAutoRefresh(5000)); // Refresh API every 5 seconds without page reload
   </script>
 </head>
 <body>
